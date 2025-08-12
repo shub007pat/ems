@@ -1,0 +1,195 @@
+<div class="employee-form-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <div class="header-left">
+        <button class="btn-back" (click)="onCancel()">
+          ← Back to Employees
+        </button>
+        <h1>{{ isEditMode() ? 'Edit Employee' : 'Add New Employee' }}</h1>
+      </div>
+      <div class="user-info">
+        <span>Welcome, {{ currentUser()?.username }}</span>
+        <button class="btn-secondary" (click)="logout()">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Loading State -->
+    @if (loading$ | async) {
+      <div class="loading">
+        <div class="spinner-large"></div>
+        <p>{{ isEditMode() ? 'Loading employee data...' : 'Saving employee...' }}</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error$ | async; as error) {
+      <div class="error-message">
+        {{ error }}
+      </div>
+    }
+
+    <!-- Employee Form -->
+    @if (!(loading$ | async)) {
+      <div class="form-container">
+      <div class="form-card">
+        <div class="form-header">
+          <h2>{{ isEditMode() ? 'Update Employee Information' : 'Add Employee Information' }}</h2>
+        </div>
+
+        <form [formGroup]="employeeForm" (ngSubmit)="onSubmit()" class="employee-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Full Name *</label>
+              <input
+                type="text"
+                id="name"
+                formControlName="name"
+                class="form-control"
+                [class.error]="getFieldError('name')"
+                placeholder="Enter full name"
+              />
+              @if (getFieldError('name')) {
+                <div class="error-message">
+                  {{ getFieldError('name') }}
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email Address *</label>
+              <input
+                type="email"
+                id="email"
+                formControlName="email"
+                class="form-control"
+                [class.error]="getFieldError('email')"
+                placeholder="Enter email address"
+              />
+              @if (getFieldError('email')) {
+                <div class="error-message">
+                  {{ getFieldError('email') }}
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="position">Position *</label>
+              <input
+                type="text"
+                id="position"
+                formControlName="position"
+                class="form-control"
+                [class.error]="getFieldError('position')"
+                placeholder="Enter job position"
+              />
+              @if (getFieldError('position')) {
+                <div class="error-message">
+                  {{ getFieldError('position') }}
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="department">Department *</label>
+              <select
+                id="department"
+                formControlName="department"
+                class="form-control"
+                [class.error]="getFieldError('department')"
+              >
+                <option value="">Select Department</option>
+                <option value="Engineering">Engineering</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Sales">Sales</option>
+                <option value="HR">Human Resources</option>
+                <option value="Finance">Finance</option>
+                <option value="Operations">Operations</option>
+                <option value="Design">Design</option>
+                <option value="Product">Product</option>
+              </select>
+              @if (getFieldError('department')) {
+                <div class="error-message">
+                  {{ getFieldError('department') }}
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="mobile">Mobile Number *</label>
+              <input
+                type="tel"
+                id="mobile"
+                formControlName="mobile"
+                class="form-control"
+                [class.error]="getFieldError('mobile')"
+                placeholder="Enter 10-digit mobile number"
+                maxlength="10"
+              />
+              @if (getFieldError('mobile')) {
+                <div class="error-message">
+                  {{ getFieldError('mobile') }}
+                </div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="joinDate">Join Date *</label>
+              <input
+                type="date"
+                id="joinDate"
+                formControlName="joinDate"
+                class="form-control"
+                [class.error]="getFieldError('joinDate')"
+              />
+              @if (getFieldError('joinDate')) {
+                <div class="error-message">
+                  {{ getFieldError('joinDate') }}
+                </div>
+              }
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group checkbox-group">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  formControlName="isActive"
+                  class="checkbox-input"
+                />
+                <span class="checkbox-custom"></span>
+                <span class="checkbox-text">Active</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="button"
+              class="btn-secondary"
+              (click)="onCancel()"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="btn-primary"
+              [disabled]="employeeForm.invalid || (loading$ | async)"
+            >
+              {{ isEditMode() ? 'Update Employee' : 'Add Employee' }}
+            </button>
+          </div>
+        </form>
+      </div>
+      </div>
+    }
+  </div>
+</div>

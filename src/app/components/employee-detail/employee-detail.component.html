@@ -1,0 +1,176 @@
+<div class="employee-detail-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <div class="header-left">
+        <button class="btn-back" (click)="goBack()">
+          ← Back to Employees
+        </button>
+        <h1>Employee Details</h1>
+      </div>
+      <div class="user-info">
+        <span>Welcome, {{ currentUser()?.username }}</span>
+        <button class="btn-secondary" (click)="logout()">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Loading State -->
+    @if (loading$ | async) {
+      <div class="loading">
+        <div class="spinner-large"></div>
+        <p>Loading employee details...</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error$ | async; as error) {
+      <div class="error-message">
+        {{ error }}
+      </div>
+    }
+
+    <!-- Employee Details -->
+    @if (employee$ | async; as employee) {
+      <div class="employee-details">
+      <app-card 
+        [title]="employee.name"
+        [subtitle]="employee.position"
+        cardClass="detail-card"
+        [showFooter]="canEditThisEmployee() || isAdmin()"
+      >
+        <!-- Employee Information -->
+        <div class="employee-info">
+          <div class="info-section">
+            <h3>Personal Information</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">Full Name:</span>
+                <span class="value">{{ employee.name }}</span>
+              </div>
+              
+              <div class="info-item">
+                <span class="label">Email:</span>
+                <span class="value">{{ employee.email }}</span>
+              </div>
+              
+              <div class="info-item">
+                <span class="label">Mobile:</span>
+                <span class="value">{{ employee.mobile | mobileFormat }}</span>
+              </div>
+              
+              <div class="info-item">
+                <span class="label">Status:</span>
+                <span 
+                  class="value status"
+                  [appStatusHighlight]="employee.isActive"
+                >
+                  {{ employee.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <h3>Work Information</h3>
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="label">Position:</span>
+                <span class="value">{{ employee.position }}</span>
+              </div>
+              
+              <div class="info-item">
+                <span class="label">Department:</span>
+                <span class="value">{{ employee.department }}</span>
+              </div>
+              
+              <div class="info-item">
+                <span class="label">Join Date:</span>
+                <span class="value">{{ employee.joinDate | date:'fullDate' }}</span>
+              </div>
+              
+              <div class="info-item">
+                <span class="label">Employee ID:</span>
+                <span class="value">{{ employee.id }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions Footer -->
+        @if (canEditThisEmployee() || isAdmin()) {
+          <div slot="footer">
+            <div class="detail-actions">
+              @if (canEditThisEmployee()) {
+                <button class="btn-primary" (click)="onEdit()">
+                  Edit My Details
+                </button>
+              }
+              @if (isAdmin()) {
+                <button class="btn-primary" (click)="onEdit()">
+                  Edit Employee
+                </button>
+                <button class="btn-danger" (click)="onDelete()">
+                  Delete Employee
+                </button>
+              }
+            </div>
+          </div>
+        }
+      </app-card>
+
+      <!-- Dynamic Notes Card -->
+      <app-card 
+        title="Dynamic Notes"
+        cardClass="detail-card"
+        [showFooter]="true"
+      >
+        @if (!showDynamicNotes()) {
+          <div class="notes-placeholder">
+            <div class="placeholder-content">
+              <div class="placeholder-icon">📝</div>
+              <h4>Notes</h4>
+              <p>Click "Load Notes" to load the notes for this employee.</p>
+            </div>
+          </div>
+        }
+        
+        <!-- Dynamic Component Container -->
+        <div #dynamicNotesContainer></div>
+        
+        <!-- Footer with toggle button -->
+        <div slot="footer">
+          <div class="dynamic-actions">
+            <button 
+              class="btn-primary" 
+              (click)="toggleDynamicNotes()"
+            >
+              {{ showDynamicNotes() ? 'Unload Notes' : 'Load Notes' }}
+            </button>
+            @if (showDynamicNotes()) {
+              <span class="dynamic-status">✅ Notes loaded dynamically</span>
+            }
+          </div>
+        </div>
+      </app-card>
+      </div>
+    }
+
+    <!-- Employee Not Found -->
+    @if (!(loading$ | async) && !(employee$ | async)) {
+      <div class="not-found">
+        <div class="not-found-icon">👤</div>
+        <h3>Employee Not Found</h3>
+        <p>The employee you're looking for doesn't exist or has been removed.</p>
+        <button class="btn-primary" (click)="goBack()">
+          Back to Employee List
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Dynamic Delete Modal Container -->
+  <div #deleteModalContainer></div>
+</div>

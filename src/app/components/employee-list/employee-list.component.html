@@ -1,0 +1,153 @@
+<div class="employee-list-container">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-content">
+      <h1>Employee Management System</h1>
+      <div class="user-info">
+        <span>Welcome, {{ currentUser()?.username }}</span>
+        <button class="btn-secondary" (click)="logout()">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Search and Actions -->
+    <div class="actions-bar">
+      <div class="search-container">
+        <input
+          type="text"
+          placeholder="Search employees..."
+          class="search-input"
+          [value]="searchTerm()"
+          (input)="onSearch($event)"
+        />
+      </div>
+      
+      @if (isAdmin()) {
+        <button 
+          class="btn-primary" 
+          (click)="onAdd()"
+          routerLink="/employee-form"
+        >
+          Add Employee
+        </button>
+      }
+    </div>
+
+    <!-- Loading State -->
+    @if (loading$ | async) {
+      <div class="loading">
+        <div class="spinner-large"></div>
+        <p>Loading employees...</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error$ | async; as error) {
+      <div class="error-message">
+        {{ error }}
+      </div>
+    }
+
+    <!-- Employee Grid -->
+    @if (!(loading$ | async)) {
+      <div class="employee-grid">
+        @for (employee of filteredEmployees(); track employee.id) {
+          <app-card 
+            [title]="employee.name"
+            [subtitle]="employee.position"
+            cardClass="employee-card"
+            [showFooter]="true"
+          >
+        <!-- Employee Details -->
+        <div class="employee-details">
+          <div class="detail-row">
+            <span class="label">Email:</span>
+            <span class="value">{{ employee.email }}</span>
+          </div>
+          
+          <div class="detail-row">
+            <span class="label">Department:</span>
+            <span class="value">{{ employee.department }}</span>
+          </div>
+          
+          <div class="detail-row">
+            <span class="label">Mobile:</span>
+            <span class="value">{{ employee.mobile | mobileFormat }}</span>
+          </div>
+          
+          <div class="detail-row">
+            <span class="label">Status:</span>
+            <span 
+              class="value status"
+              [appStatusHighlight]="employee.isActive"
+            >
+              {{ employee.isActive ? 'Active' : 'Inactive' }}
+            </span>
+          </div>
+          
+          <div class="detail-row">
+            <span class="label">Join Date:</span>
+            <span class="value">{{ employee.joinDate | date:'mediumDate' }}</span>
+          </div>
+        </div>
+
+            <!-- Actions Footer -->
+            <div slot="footer">
+              <div class="card-actions">
+                <button 
+                  class="btn-outline" 
+                  [routerLink]="['/employee', employee.id]"
+                >
+                  View Details
+                </button>
+                @if (canEditEmployee(employee)) {
+                  <button 
+                    class="btn-primary" 
+                    (click)="onEdit(employee)"
+                  >
+                    Edit
+                  </button>
+                }
+                @if (canDeleteEmployee(employee)) {
+                  <button 
+                    class="btn-danger" 
+                    (click)="onDelete(employee)"
+                  >
+                    Delete
+                  </button>
+                }
+              </div>
+            </div>
+          </app-card>
+        }
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (!(loading$ | async) && filteredEmployees().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <h3>No employees found</h3>
+        @if (searchTerm()) {
+          <p>Try adjusting your search criteria</p>
+        }
+        @if (!searchTerm()) {
+          <p>No employees have been added yet</p>
+        }
+        @if (isAdmin() && !searchTerm()) {
+          <button 
+            class="btn-primary" 
+            routerLink="/employee-form"
+          >
+            Add First Employee
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Dynamic Delete Modal Container -->
+  <div #deleteModalContainer></div>
+</div>
